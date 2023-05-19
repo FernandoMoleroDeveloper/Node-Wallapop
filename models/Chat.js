@@ -1,15 +1,27 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const sampleSchema = new Schema(
+const chatSchema = new Schema(
   {
-    title: {
-      type: String,
+    buyer: {
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
-    subtitle: {
-      type: String,
+    salesman: {
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "User",
+    },
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Product",
+    },
+    messages: {
+      type: [mongoose.Schema.Types.ObjectId],
+      required: true,
+      ref: "Message",
     },
   },
   {
@@ -17,5 +29,5 @@ const sampleSchema = new Schema(
   }
 );
 
-const Sample = mongoose.model("Sample", sampleSchema);
-module.exports = { Sample };
+const Chat = mongoose.model("Chat", chatSchema);
+module.exports = { Chat };
