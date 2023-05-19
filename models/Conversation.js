@@ -32,4 +32,4 @@ const conversationSchema = new Schema(
 );
 
 const Conversation = mongoose.model("Conversation", conversationSchema);
-module.exports = { Sample };
+module.exports = { Conversation };
