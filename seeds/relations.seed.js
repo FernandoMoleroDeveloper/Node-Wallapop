@@ -3,7 +3,7 @@ const { connect } = require("../db.js");
 const { User } = require("../models/User.js");
 const { Product } = require("../models/Product.js");
 
-const userReslationsSeed = async () => {
+const relationSeed = async () => {
   try {
     await connect();
     console.log("Tenemos conexión!");
@@ -24,19 +24,16 @@ const userReslationsSeed = async () => {
     }
 
     for (let i = 0; i < users.length; i++) {
-      const user = users[i];
-      const randomProduct = products[generateRandom(0, products.length - 1)];
-      const randomUser = users[generateRandom(0, users.length - 1)];
-      user.owner = randomUser.id;
-      user.brand = randomProduct.id;
-      await user.save();
+      users[i].salesman = products[i];
+      await users[i].save();
     }
 
     console.log("Relaciones entre coches-marcas-usuarios creadas correctamente.");
   } catch (error) {
+    console.error("Algo ha salido mal... :(");
   } finally {
     mongoose.disconnect();
   }
 };
 
-userReslationsSeed();
+relationSeed();
