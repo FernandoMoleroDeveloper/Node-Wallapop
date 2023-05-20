@@ -1,34 +1,47 @@
 const express = require("express");
-
 // Modelos
-const { Sample } = require("../models/Sample.js");
+const { Product } = require("../models/Product.js");
+const { isAuth } = require("../middlewares/auth.middleware.js");
 
 const router = express.Router();
 
 // CRUD: READ
-router.get("/", async (req, res) => {
+router.get("/", (req, res, next) => {
+  console.log("Estamos en el middleware /product que comprueba parametros");
+  const page = req.querypage ? parseInt(req.querypage) : 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+  if (!isNaN(page) && !isNaN(limit) && page > 0 && limit > 0) {
+    req.query.page = page;
+    req.query.limit = limit;
+    next();
+  } else {
+    console.log("Parametros no validos:");
+    console.log(JSON.stringify(req.query));
+    res.status(400).json({ error: "Params page or limit are not valid" });
+  }
+});
+router.get("/", async (req, res, next) => {
   try {
-    // Asi leemos query params
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
-    const samples = await Sample.find()
+    // Así leemos query params
+    const { page, limit } = req.query;
+    const products = await Product.find()
       .limit(limit)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .populate("User");
 
     // Num total de elementos
-    const totalElements = await Sample.countDocuments();
+    const totalElements = await Product.countDocuments();
 
     const response = {
       totalItems: totalElements,
       totalPages: Math.ceil(totalElements / limit),
       currentPage: page,
-      data: samples,
+      data: products,
     };
 
     res.json(response);
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
@@ -36,65 +49,62 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const sample = await Sample.findById(id);
-    if (sample) {
-      res.json(sample);
+    const product = await Product.findById(id).populate("User");
+    if (product) {
+      res.json(product);
     } else {
       res.status(404).json({});
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-router.get("/title/:title", async (req, res) => {
-  const title = req.params.title;
+router.get("/name/:name", async (req, res) => {
+  const name = req.params.name;
 
   try {
-    const sample = await Sample.find({ title: new RegExp("^" + title.toLowerCase(), "i") });
-    if (sample?.length) {
-      res.json(sample);
+    const product = await Product.find({ name: new RegExp("^" + name.toLowerCase(), "i") }).populate("author");
+    if (product?.length) {
+      res.json(product);
     } else {
       res.status(404).json([]);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
 // CRUD: CREATE
-router.post("/", async (req, res) => {
-  console.log(req.headers);
-
+router.post("/", isAuth, async (req, res, next) => {
   try {
-    const sample = new Sample({
-      title: req.body.title,
-      subtitle: req.body.subtitle,
-    });
-
-    const createdSample = await sample.save();
-    return res.status(201).json(createdSample);
+    const id = req.params.id;
+    if (req.user.id !== id && req.user.email !== "admin@gmail.com") {
+      return res.status(404).json({ error: "No tienes autorizacion para realizar esta operacion" });
+    }
+    const product = new Product(req.body);
+    const createdProduct = await product.save();
+    return res.status(201).json(createdProduct);
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
 // CRUD: DELETE
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAuth, async (req, res) => {
   try {
     const id = req.params.id;
-    const sampleDeleted = await Sample.findByIdAndDelete(id);
-    if (sampleDeleted) {
-      res.json(sampleDeleted);
+    if (req.user.id !== id && req.user.email !== "admin@gmail.com") {
+      return res.status(404).json({ error: "No tienes autorizacion para realizar esta operacion" });
+    }
+    const productDeleted = await Product.findByIdAndDelete(id);
+    if (productDeleted) {
+      res.json(productDeleted);
     } else {
       res.status(404).json({});
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
@@ -102,16 +112,15 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const sampleUpdated = await Sample.findByIdAndUpdate(id, req.body, { new: true });
-    if (sampleUpdated) {
-      res.json(sampleUpdated);
+    const productUpdated = await Product.findByIdAndUpdate(id, req.body, { new: true });
+    if (productUpdated) {
+      res.json(productUpdated);
     } else {
       res.status(404).json({});
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-module.exports = { sampleRouter: router };
+module.exports = { productRouter: router };
