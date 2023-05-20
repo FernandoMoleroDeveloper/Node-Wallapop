@@ -3,6 +3,7 @@ const express = require("express");
 // Modelos
 const { Chat } = require("../models/Chat.js");
 const { isAuth } = require("../middlewares/auth.middleware.js");
+const { Product } = require("../models/Product.js");
 
 // Router propio de usuarios
 const router = express.Router();
@@ -71,19 +72,38 @@ router.get("/:id", async (req, res, next) => {
 
 // Endpoint de creación de chats
 // CRUD: CREATE
-router.post("/", async (req, res, next) => {
+router.post("/", isAuth, async (req, res, next) => {
   try {
-    const chat = new Chat(req.body);
-    const createdChat = await chat.save();
-    return res.status(201).json(createdChat);
+    const product = await Product.findById(req.body.productId);
+
+    if (product) {
+      const chat = new Chat({
+        buyer: req.user.id,
+        salesman: product.salesman,
+        product: product,
+        message: [],
+      });
+
+      const createdChat = await chat.save();
+      return res.status(201).json(createdChat);
+    } else {
+      return res.status(404).json({ error: "Producto no encontrado..." });
+    }
   } catch (error) {
     next(error);
   }
 });
 
-router.post("/add-message", async (req, res, next) => {
+router.post("/:id/add-message", isAuth, async (req, res, next) => {
   try {
-    const chat = new Chat(req.body);
+    const chat = await Chat.findById(req.query.id);
+    if (chat) {
+      const message = {
+        text: req.body.text,
+        from: req.user.id,
+        to: req.user.id === chat.buyer ? chat.salesman : chat.buyer,
+      };
+    }
     const createdChat = await chat.save();
     return res.status(201).json(createdChat);
   } catch (error) {

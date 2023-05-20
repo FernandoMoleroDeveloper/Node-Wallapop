@@ -45,7 +45,7 @@ const chatSchema = new Schema(
           },
         },
       ],
-      required: false,
+      required: true,
     },
   },
   {
