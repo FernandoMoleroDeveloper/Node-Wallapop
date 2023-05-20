@@ -2,8 +2,6 @@ const express = require("express");
 const bcrypt = require("bcrypt")
 const { isAuth } = require("../middlewares/auth.middleware.js")
 const { generateToken } = require("../utils/token.js")
-const fs = require("fs")
-const multer = require("multer")
 
 
 // Modelos
