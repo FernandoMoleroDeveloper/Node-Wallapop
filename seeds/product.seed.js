@@ -17,7 +17,6 @@ let productList = [
     name: "Plug cola de zorra",
     price: 20,
     description: "La longitud total de este juguete anal es de 40 centímetros. La profundidad de inserción del tapón anal es de 6 centímetros. El diámetro es de 2.7 centímetros.",
-    photo: imageContentThree,
   },
   {
     name: "Vibrador rabbit",
