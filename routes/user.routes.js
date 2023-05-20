@@ -29,7 +29,7 @@ router.get("/", (req, res, next) => {
 router.get("/", async (req, res) => {
   try {
     // Asi leemos query params
-    const { page, limit} = req.query
+    const { page, limit } = req.query
     const users = await User.find()
       .limit(limit)
       .skip((page - 1) * limit);
