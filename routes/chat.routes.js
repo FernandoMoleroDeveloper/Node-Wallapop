@@ -1,117 +1,94 @@
 const express = require("express");
 
 // Modelos
-const { Sample } = require("../models/Sample.js");
+const { Chat } = require("../models/Chat.js");
+const { isAuth } = require("../middlewares/auth.middleware.js");
 
+// Router propio de usuarios
 const router = express.Router();
 
 // CRUD: READ
-router.get("/", async (req, res) => {
+router.get("/", (req, res, next) => {
+  try {
+    console.log("Estamos en el middleware /chat que comprueba parámetros");
+
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+    if (!isNaN(page) && !isNaN(limit) && page > 0 && limit > 0) {
+      req.query.page = page;
+      req.query.limit = limit;
+      next();
+    } else {
+      console.log("Parámetros no válidos:");
+      console.log(JSON.stringify(req.query));
+      res.status(400).json({ error: "Params page or limit are not valid" });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/", isAuth, async (req, res, next) => {
   try {
     // Asi leemos query params
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
-    const samples = await Sample.find()
+    const { page, limit } = req.query;
+    const chats = await Chat.find({ $or: [{ buyer: req.user.id }, { salesman: req.user.id }] })
       .limit(limit)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .populate(["buyer", "salesman", "product"]);
 
     // Num total de elementos
-    const totalElements = await Sample.countDocuments();
+    const totalElements = await Chat.countDocuments({ $or: [{ buyer: req.user.id }, { salesman: req.user.id }] });
 
     const response = {
       totalItems: totalElements,
       totalPages: Math.ceil(totalElements / limit),
       currentPage: page,
-      data: samples,
+      data: chats,
     };
 
     res.json(response);
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
 // CRUD: READ
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req, res, next) => {
   try {
     const id = req.params.id;
-    const sample = await Sample.findById(id);
-    if (sample) {
-      res.json(sample);
+    const chat = await Chat.findById(id).populate(["buyer", "salesman", "product"]);
+    if (chat) {
+      res.json(chat);
     } else {
       res.status(404).json({});
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-router.get("/title/:title", async (req, res) => {
-  const title = req.params.title;
-
-  try {
-    const sample = await Sample.find({ title: new RegExp("^" + title.toLowerCase(), "i") });
-    if (sample?.length) {
-      res.json(sample);
-    } else {
-      res.status(404).json([]);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
-  }
-});
-
+// Endpoint de creación de chats
 // CRUD: CREATE
-router.post("/", async (req, res) => {
-  console.log(req.headers);
-
+router.post("/", async (req, res, next) => {
   try {
-    const sample = new Sample({
-      title: req.body.title,
-      subtitle: req.body.subtitle,
-    });
-
-    const createdSample = await sample.save();
-    return res.status(201).json(createdSample);
+    const chat = new Chat(req.body);
+    const createdChat = await chat.save();
+    return res.status(201).json(createdChat);
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-// CRUD: DELETE
-router.delete("/:id", async (req, res) => {
+router.post("/add-message", async (req, res, next) => {
   try {
-    const id = req.params.id;
-    const sampleDeleted = await Sample.findByIdAndDelete(id);
-    if (sampleDeleted) {
-      res.json(sampleDeleted);
-    } else {
-      res.status(404).json({});
-    }
+    const chat = new Chat(req.body);
+    const createdChat = await chat.save();
+    return res.status(201).json(createdChat);
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-// CRUD: UPDATE
-router.put("/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const sampleUpdated = await Sample.findByIdAndUpdate(id, req.body, { new: true });
-    if (sampleUpdated) {
-      res.json(sampleUpdated);
-    } else {
-      res.status(404).json({});
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
-  }
-});
-
-module.exports = { sampleRouter: router };
+module.exports = { chatRouter: router };
