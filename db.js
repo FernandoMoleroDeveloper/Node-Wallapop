@@ -10,11 +10,7 @@ const config = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
-<<<<<<< HEAD
   dbName: process.env.DB_NAME,
-=======
-  dbName: DB_NAME,
->>>>>>> 9deb039 (Some fixes)
 };
 
 const connect = async () => {
