@@ -103,6 +103,7 @@ router.post("/:id/add-message", isAuth, async (req, res, next) => {
         from: req.user.id,
         to: req.user.id === chat.buyer ? chat.salesman : chat.buyer,
       };
+      chat.messages.push(message);
     }
     const createdChat = await chat.save();
     return res.status(201).json(createdChat);
