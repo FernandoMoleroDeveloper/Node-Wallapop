@@ -4,7 +4,6 @@ const { isAuth } = require("../middlewares/auth.middleware.js")
 const { generateToken } = require("../utils/token.js")
 const fs = require("fs")
 const multer = require("multer")
-const upload = multer({ dest: "public" });
 
 
 // Modelos
@@ -72,19 +71,15 @@ router.get("/:id", async (req, res) => {
 
 // CRUD: CREATE
 router.post("/", async (req, res) => {
-  console.log(req.headers);
 
   try {
-    const sample = new Sample({
-      title: req.body.title,
-      subtitle: req.body.subtitle,
-    });
+    const user = new User(req.user)
 
-    const createdSample = await sample.save();
-    return res.status(201).json(createdSample);
+    const createdUser = await user.save();
+    return res.status(201).json(createdUser);
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    next(error)
   }
 });
 
@@ -92,32 +87,79 @@ router.post("/", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const sampleDeleted = await Sample.findByIdAndDelete(id);
-    if (sampleDeleted) {
-      res.json(sampleDeleted);
+
+    if (req.user.id !== id || req.user.email !== "admin@gmail.com") {
+      return res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
+    }
+
+    const userDeleted = await User.findByIdAndDelete(id);
+    if (userDeleted) {
+      res.json(userDeleted);
     } else {
       res.status(404).json({});
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    next(error)
   }
 });
 
 // CRUD: UPDATE
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAuth, async (req, res) => {
   try {
     const id = req.params.id;
-    const sampleUpdated = await Sample.findByIdAndUpdate(id, req.body, { new: true });
-    if (sampleUpdated) {
-      res.json(sampleUpdated);
+
+    if (req.user.id !== id || req.user.email !== "admin@gmail.com") {
+      return res.status(401).json({ error: "No tienes autorización para realizar esta operación" })
+    }
+
+    const userUpdated = await User.findById(id);
+    if (userUpdated) {
+      Object.assign(userUpdated, req.body)
+      await userUpdated.save()
+      const userToSend = userUpdated.toObject()
+      delete userToSend.password
+      res.json(userToSend);
     } else {
       res.status(404).json({});
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
+    next(error)
   }
 });
 
-module.exports = { sampleRouter: router };
+
+//CRUD: LOGIN
+
+router.post("/login", async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Se deben especificar los campos email y password" });
+    }
+
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res.status(401).json({ error: "Email y/o contraseña incorrectos" });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (match) {
+      // Quitamos password de la respuesta
+      const userWithoutPass = user.toObject();
+      delete userWithoutPass.password;
+
+      const jwtToken = generateToken(user._id, user.email);
+
+      return res.status(200).json({ token: jwtToken });
+    } else {
+      return res.status(401).json({ error: "Email y/o contraseña incorrectos" });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+module.exports = { userRouter: router };
