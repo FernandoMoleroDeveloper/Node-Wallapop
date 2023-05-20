@@ -1,6 +1,8 @@
 const express = require("express");
-const { sampleRouter } = require("./routes/sample.routes.js");
-const { errorServer } = require("./middlewares/error.middleware.js")
+const { chatRouter } = require("./routes/chat.routes.js");
+const { productRouter } = require("./routes/product.routes.js");
+const { userRouter } = require("./routes/user.routes.js");
+const { errorServer } = require("./middlewares/error.middleware.js");
 
 // Conexión a la BBDD
 const { connect } = require("./db.js");
@@ -22,12 +24,14 @@ router.get("*", (req, res) => {
 });
 
 // Usamos las rutas
-server.use("/sample", sampleRouter);
+server.use("/chat", chatRouter);
+server.use("/product", productRouter);
+server.use("/user", userRouter);
 server.use("/", router);
 
 server.use((err, req, res, next) => {
-  errorServer(err, req, res, next)
-})
+  errorServer(err, req, res, next);
+});
 
 server.listen(PORT, () => {
   console.log(`Server levantado en el puerto ${PORT}`);

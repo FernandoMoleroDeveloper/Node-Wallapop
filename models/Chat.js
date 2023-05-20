@@ -19,9 +19,33 @@ const chatSchema = new Schema(
       ref: "Product",
     },
     messages: {
-      type: [mongoose.Schema.Types.ObjectId],
+      type: [
+        {
+          text: {
+            type: String,
+            required: true,
+            trim: true,
+            minlength: [1, "El mensaje tiene que tener 1 caracter como mínimo y 150 como máximo."],
+            maxlength: [150, "El mensaje tiene que tener 1 caracter como mínimo y 150 como máximo."],
+          },
+          from: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "User",
+          },
+          to: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "User",
+          },
+          date: {
+            type: Date,
+            default: new Date(),
+            required: true,
+          },
+        },
+      ],
       required: true,
-      ref: "Message",
     },
   },
   {
