@@ -8,7 +8,7 @@ const productSchema = new Schema(
       required: true,
       minLength: [3, "The product name must have 3 characters minimum"],
       maxLength: [50, "The product name must have lower than 50 characters"],
-      trim: true
+      trim: true,
     },
     price: {
       type: Number,
@@ -18,11 +18,11 @@ const productSchema = new Schema(
       type: String,
       required: true,
       maxLength: [150, "The product name must have 150 characters maximum"],
-      trim: true
+      trim: true,
     },
     photo: {
       type: String,
-      require: true,
+      require: false,
     },
     salesman: {
       type: mongoose.Schema.Types.ObjectId,
