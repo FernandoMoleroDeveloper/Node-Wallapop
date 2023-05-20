@@ -1,6 +1,7 @@
 // Cargamos variables de entorno
 require("dotenv").config();
 const DB_CONNECTION = process.env.DB_URL;
+const DB_NAME = process.env.DB_NAME;
 
 const mongoose = require("mongoose");
 
@@ -9,7 +10,11 @@ const config = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
+<<<<<<< HEAD
   dbName: process.env.DB_NAME,
+=======
+  dbName: DB_NAME,
+>>>>>>> 9deb039 (Some fixes)
 };
 
 const connect = async () => {

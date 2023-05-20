@@ -25,7 +25,11 @@ const userSchema = new Schema(
       type: String,
       required: true,
       validate: {
+<<<<<<< HEAD
         validator: (value) => validator.isStrongPassword([value, { minSymbols: 0 }]),
+=======
+        validator: (value) => validator.isStrongPassword(value, { minSymbols: 0 }),
+>>>>>>> 9deb039 (Some fixes)
         message: "La contraseña debe tener como mínimo 8 caractéres, una mayúscula, una minúscula y un número",
       },
     },
