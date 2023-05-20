@@ -1,5 +1,5 @@
 const { User } = require("../models/User.js")
-const { verifyToken } = require("../utlis/token.js")
+const { verifyToken } = require("../utils/token.js")
 
 const isAuth = async (req, res, next) => {
     try{
