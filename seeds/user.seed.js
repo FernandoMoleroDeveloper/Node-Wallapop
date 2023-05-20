@@ -6,22 +6,22 @@ const userList = [
   {
     fullName: "Juan García Pérez",
     email: "juan.garcia.perez@example.com",
-    password: "juan1234"
+    password: "Juan1234"
   },
   {
     fullName: "María Rodríguez López",
     email: "maria.rodriguez.lopez@example.com",
-    password: "maria5678"
+    password: "Maria5678"
   },
   {
     fullName: "Pedro Fernández Ruiz",
     email: "pedro.fernandez.ruiz@example.com",
-    password: "pedro9012"
+    password: "Pedro9012"
   },
   {
     fullName: "Laura Sánchez Navarro",
     email: "laura.sanchez.navarro@example.com",
-    password: "laura3456"
+    password: "Laura3456"
   }
 ];
 
