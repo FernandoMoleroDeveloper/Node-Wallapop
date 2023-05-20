@@ -1,9 +1,20 @@
 const express = require("express");
+const bcrypt = require("bcrypt")
+const { isAuth } = require("../middlewares/auth.middleware.js")
+const { generateToken } = require("../utlis/token.js")
+const fs = require("fs")
+const multer = require("multer")
+const upload = multer({ dest: "public" });
+
 
 // Modelos
-const { Sample } = require("../models/Sample.js");
+const { User } = require("../models/User.js")
 
 const router = express.Router();
+
+router.get("/", (req, res, next) => {
+  console.log("Estamos en el middleware")
+})
 
 // CRUD: READ
 router.get("/", async (req, res) => {
