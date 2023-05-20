@@ -35,5 +35,18 @@ const userSchema = new Schema(
   }
 );
 
+userSchema.pre("save", async function (next) {
+  try {
+    if (this.isModified("password")) {
+      const saltRounds = 10;
+      const passwordEncrypted = await brcypt.hash(this.password, saltRounds);
+      this.password = passwordEncrypted;
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 const User = mongoose.model("User", userSchema);
 module.exports = { User };
