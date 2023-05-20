@@ -23,9 +23,9 @@ const relationSeed = async () => {
       return;
     }
 
-    for (let i = 0; i < users.length; i++) {
-      users[i].salesman = products[i];
-      await users[i].save();
+    for (let i = 0; i < products.length; i++) {
+      products[i].salesman = users[i];
+      await products[i].save();
     }
 
     console.log("Relaciones entre coches-marcas-usuarios creadas correctamente.");

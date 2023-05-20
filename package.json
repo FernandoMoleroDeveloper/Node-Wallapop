@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node --watch index.js",
-    "seed:all": "node ./seeds/user.seed.js && node ./seeds/product.seed.js && node ./seeds/relations.seed.js",
+    "seed:all": "node ./seeds/product.seed.js && node ./seeds/user.seed.js && node ./seeds/relations.seed.js",
     "lint": "eslint",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install"
